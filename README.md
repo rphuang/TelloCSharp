@@ -20,8 +20,8 @@ On starting, TelloCmd will connect to the Tello drone by sending "command" to th
 * 0 or takeoff - send takeoff command to Tello drone
 * 1 or land - send land command to Tello drone
 * 2 or end - this instructs telloCmd to exit and send necessary commands to the drone (such as land, streamoff).
-* p or photo - take a picture and save to file. The file name is yyyy-mmdd-hhmmss.png under the current folder.
-* v or video - start/stop video recording. The video file is yyyy-mmdd-hhmmss.avi under the current folder.
+* p or photo - take a picture and save to file. The file name is yyyy-MMdd-HHmmss-ff.jpg under the current folder.
+* v or video - start/stop video recording. The video file is yyyy-MMdd-HHmmss-ff.avi under the current folder.
 * s or stream - start/stop video streaming in a separate window.
 * run <file> - load and execute commands from file. If no file is specified telloCmd load from telloCommands.txt. The run command can be nested but there is no check for infinite loop. See examples in the files under samples folder.
 * sleep <sec> - sleep in seconds. The default value is 1.0. This is useful in the command file.
@@ -33,15 +33,15 @@ Sample code:
 ```
     Tello tello = new Tello();
     tello.Connect();
-	tello.Takeoff();
-	tello.StartOrStopVideoStreaming();
-	tello.Forward(50);
-	tello.Up(50);
-	tello.FlipForward();
-	tello.Clockwise(360);
-	tello.Left(100);
-	tello.StartOrStopVideoStreaming();
-	tello.Land();
+    tello.Takeoff();
+    tello.StartOrStopVideoStreaming();
+    tello.Forward(50);
+    tello.Up(50);
+    tello.FlipForward();
+    tello.Clockwise(360);
+    tello.Left(100);
+    tello.StartOrStopVideoStreaming();
+    tello.Land();
 ```
 
 # C# Projects
@@ -50,3 +50,12 @@ Sample code:
 * LogLib - contains log utilities. Implement ILog and set Log.Instance to override the default console log or add to Log.Instances to support multiple logs.
 * The samples folder contains examples of command file that can be loaded/run by telloCmd.
 
+# Troubleshoot
+* Cannot take photo or record video but streaming works file - make sure that the current folder has permission grant to Users. Also, in StartFFmpegProcess, change the following code to debug.
+```
+change from code:
+                UseShellExecute = true,
+to:
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+```
