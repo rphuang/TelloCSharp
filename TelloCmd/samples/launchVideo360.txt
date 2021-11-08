@@ -1,0 +1,4 @@
+takeoff
+run video360.txt
+sleep 3
+land

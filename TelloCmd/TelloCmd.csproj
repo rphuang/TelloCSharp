@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Tello\Tello.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="samples\" />
+  </ItemGroup>
+
 </Project>

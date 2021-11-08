@@ -1,0 +1,5 @@
+stream
+takeoff
+sleep 3
+height?
+land

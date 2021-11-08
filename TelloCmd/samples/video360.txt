@@ -1,0 +1,13 @@
+# recording video on 360-degree with pause every 90 degrees
+speed 20
+video
+sleep 2
+cw 90
+sleep 2
+cw 90
+sleep 2
+cw 90
+sleep 2
+cw 90
+sleep 2
+video

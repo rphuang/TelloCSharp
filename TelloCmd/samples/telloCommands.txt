@@ -1,0 +1,18 @@
+# commands to test Tello
+takeoff
+photo
+sleep 1
+stream
+up 20
+down 20
+forward 20
+back 20
+left 20
+right 20
+flip l
+flip r
+flip f
+flip b
+cw 90
+ccw 90
+stream
