@@ -25,8 +25,8 @@ On starting, TelloCmd will connect to the Tello drone by sending "command" to th
 * s or stream - start/stop video streaming in a separate window.
 * run <file> - load and execute commands from file. If no file is specified telloCmd load from telloCommands.txt. The run command can be nested but there is no check for infinite loop. See examples in the files under samples folder.
 * sleep <sec> - sleep in seconds. The default value is 1.0. This is useful in the command file.
-* help        - print help menu
-* enter a valid Tello commands like "up 20", "left 50", "cw 90", "flip l". Available commands is defined in: https://dl-cdn.ryzerobotics.com/downloads/tello/20180910/Tello%20SDK%20Documentation%20EN_1.3.pdf
+* help - print help menu
+* enter a valid Tello commands like "up 20", "left 50", "cw 90", "flip l". Available commands are defined in: https://dl-cdn.ryzerobotics.com/downloads/tello/20180910/Tello%20SDK%20Documentation%20EN_1.3.pdf
 
 # Tello class Usage
 Sample code:
@@ -46,12 +46,12 @@ Sample code:
 
 # C# Projects
 * Tello - Tello (Tello.cs) is a simple API to control Tello drone. Besides the Tello commands and queries, it adds the basic support for taking photo, video, and streaming using ffmpeg.
-* TelloCmd - this is the console app that takes user inputs and excute the command.
+* TelloCmd - this is the console app that takes user inputs and excute the command.  The samples folder contains examples of command file that can be loaded/run by TelloCmd.
 * LogLib - contains log utilities. Implement ILog and set Log.Instance to override the default console log or add to Log.Instances to support multiple logs.
-* The samples folder contains examples of command file that can be loaded/run by telloCmd.
 
 # Troubleshoot
-* Cannot take photo or record video but streaming works file - make sure that the current folder has permission grant to Users. Also, in StartFFmpegProcess, change the following code to debug.
+* Cannot take photo or record video but streaming works file - make sure that the current folder has permission granted to Users.
+* To troubleshoot ffmpeg problems, change the following code in StartFFmpegProcess to enable the ffmpeg output to the console.
 ```
 change from code:
                 UseShellExecute = true,
