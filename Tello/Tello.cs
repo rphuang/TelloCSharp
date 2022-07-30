@@ -10,6 +10,19 @@ using System.Threading.Tasks;
 namespace tellocs
 {
     /// <summary>
+    /// CommandCallback will be called when sending a command to Tello
+    /// </summary>
+    /// <param name="cmd">the command send to Tello</param>
+    public delegate void CommandCallback(string cmd);
+
+    /// <summary>
+    /// CommandResultCallback will be called when receiving a command response from Tello
+    /// </summary>
+    /// <param name="cmd">the command send to Tello</param>
+    /// <param name="result">the result of the command after receiving response</param>
+    public delegate void CommandResultCallback(string cmd, string result);
+
+    /// <summary>
     /// Tello drone SDK in C#
     /// </summary>
     public class Tello
@@ -45,6 +58,26 @@ namespace tellocs
         }
 
         /// <summary>
+        /// CommandCallback will be called when sending a command to Tello
+        /// </summary>
+        public CommandCallback CommandCallback { get; set; }
+
+        /// <summary>
+        /// CommandResultCallback will be called when receiving a command response from Tello
+        /// </summary>
+        public CommandResultCallback CommandResultCallback { get; set; }
+
+        /// <summary>
+        /// ffmpeg program path (& file name)
+        /// </summary>
+        public string FFmpegPath { get; set; } = "ffmpeg.exe";
+
+        /// <summary>
+        /// enable debug mode
+        /// </summary>
+        public bool DebugMode { get; set; }
+
+        /// <summary>
         /// connected to the drone ("command" sent successfully)
         /// </summary>
         public bool Connected { get; private set; }
@@ -53,6 +86,16 @@ namespace tellocs
         /// the drone is flying ("takeoff" send successfully)
         /// </summary>
         public bool Flying { get; private set; }
+
+        /// <summary>
+        /// whether video recording is in progress
+        /// </summary>
+        public bool VideoRecording { get; private set; }
+
+        /// <summary>
+        /// whether video streaming is requested in progress
+        /// </summary>
+        public bool VideoStreaming { get; private set; }
 
         /// <summary>
         /// get the drone's state by name
@@ -71,7 +114,7 @@ namespace tellocs
         /// <returns></returns>
         public T Query<T>(string query)
         {
-            SendResponse response = SendMessage(query, waitForResponse: true, timeOutMs: 1000, expectedResponse: null);
+            TelloResponse response = SendMessage(query, waitForResponse: true, timeOutMs: 1000, expectedResponse: null);
             if (response.Ok) return (T)Convert.ChangeType(response.Response, typeof(T));
             return default(T);
         }
@@ -80,11 +123,12 @@ namespace tellocs
         /// send control command to drone
         /// </summary>
         /// <param name="command">the command string sent to drone</param>
+        /// <param name="waitForResponse">whether to wait for response from tello</param>
         /// <param name="timeOutMs">time in millisecond to wait for response</param>
         /// <returns>the raw response from drone</returns>
-        public string Control(string command, int timeOutMs = 2000)
+        public string Control(string command, bool waitForResponse = true, int timeOutMs = 2000)
         {
-            SendResponse response = SendMessage(command, waitForResponse: true, timeOutMs: timeOutMs, expectedResponse: "ok");
+            TelloResponse response = SendMessage(command, waitForResponse: waitForResponse, timeOutMs: timeOutMs, expectedResponse: "ok");
             return response.Response;
         }
 
@@ -105,7 +149,7 @@ namespace tellocs
             }
             set
             {
-                SendResponse response = SendMessage($"speed {value}");
+                TelloResponse response = SendMessage($"speed {value}");
                 if (response.Ok) _speed = value;
             }
         }
@@ -116,13 +160,16 @@ namespace tellocs
         /// <returns>returns true if the drone is connected</returns>
         public bool Connect()
         {
-            SendResponse response = SendMessage("command");
+            TelloResponse response = SendMessage("command");
             Connected = response.Ok;
             if (Connected)
             {
-                // get speed setting to calculate timeout
-                float speed = Speed;
-                Log.Info($"Connected to Tello: battery={Battery} speed={speed}");
+                try
+                {
+                    // sometimes Tello fail when query battery after cold start/boot
+                    Log.Info($"Connected to Tello: battery={Battery}");
+                }
+                catch { }
                 StartTelloStateTask();
             }
             return Connected;
@@ -146,7 +193,7 @@ namespace tellocs
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool Takeoff()
         {
-            SendResponse response = SendMessage("takeoff", waitForResponse: true, timeOutMs: 10000);
+            TelloResponse response = SendMessage("takeoff", waitForResponse: true, timeOutMs: 10000);
             Flying = response.Ok;
             return Flying;
         }
@@ -157,7 +204,7 @@ namespace tellocs
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool Land()
         {
-            SendResponse response = SendMessage("land", waitForResponse: true, timeOutMs: 10000);
+            TelloResponse response = SendMessage("land", waitForResponse: true, timeOutMs: 10000);
             Flying = !response.Ok;
             return response.Ok;
         }
@@ -168,7 +215,7 @@ namespace tellocs
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool Emergency()
         {
-            SendResponse response = SendMessage("emergency", waitForResponse: true, timeOutMs: 10000);
+            TelloResponse response = SendMessage("emergency", waitForResponse: true, timeOutMs: 10000);
             Flying = !response.Ok;
             return response.Ok;
         }
@@ -179,7 +226,7 @@ namespace tellocs
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool Fly(string cmd, int distance)
         {
-            SendResponse response = SendMessage($"{cmd} {distance}", waitForResponse: true, timeOutMs: GetTimeoutByDistance(distance));
+            TelloResponse response = SendMessage($"{cmd} {distance}", waitForResponse: true, timeOutMs: GetTimeoutByDistance(distance));
             return response.Ok;
         }
 
@@ -243,7 +290,7 @@ namespace tellocs
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool Rotate(string direction, int degree)
         {
-            SendResponse response = SendMessage($"{direction} {degree}", waitForResponse: true, timeOutMs: GetTimeoutByAngle(degree));
+            TelloResponse response = SendMessage($"{direction} {degree}", waitForResponse: true, timeOutMs: GetTimeoutByAngle(degree));
             return response.Ok;
         }
 
@@ -271,7 +318,7 @@ namespace tellocs
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool Flip(string direction)
         {
-            SendResponse response = SendMessage($"flip {direction}", waitForResponse: true, timeOutMs: 5000);
+            TelloResponse response = SendMessage($"flip {direction}", waitForResponse: true, timeOutMs: 5000);
             return response.Ok;
         }
 
@@ -312,12 +359,28 @@ namespace tellocs
         }
 
         /// <summary>
+        /// Send RC control via four channels
+        /// </summary>
+        /// <param name="left_right_velocity">-100~100 (left/right)</param>
+        /// <param name="forward_backward_velocity">-100~100 (backward/forward)</param>
+        /// <param name="up_down_velocity">-100~100 (down/up)</param>
+        /// <param name="yaw_velocity">-100~100 (yaw)</param>
+        /// <param name="context">optional command context for logging/debugging</param>
+        public bool SendRCControl(int left_right_velocity, int forward_backward_velocity, int up_down_velocity, int yaw_velocity, string context = null)
+        {
+            string cmd = $"rc {left_right_velocity} {forward_backward_velocity} {up_down_velocity} {yaw_velocity}";
+            // send command without waiting for response
+            TelloResponse response = SendMessage(cmd, false);
+            return response.Ok;
+        }
+
+        /// <summary>
         /// send streamon command to the drone
         /// </summary>
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool StreamOn()
         {
-            SendResponse response = SendMessage($"streamon");
+            TelloResponse response = SendMessage($"streamon");
             _streaming = response.Ok;
             return response.Ok;
         }
@@ -328,7 +391,7 @@ namespace tellocs
         /// <returns>returns true if the drone performs the action successfully</returns>
         public bool StreamOff()
         {
-            SendResponse response = SendMessage($"streamoff");
+            TelloResponse response = SendMessage($"streamoff");
             if (response.Ok) _streaming = false;
             return response.Ok;
         }
@@ -339,42 +402,97 @@ namespace tellocs
         /// <param name="fileName">the file path/name for the photo</param>
         public void SavePhoto(string fileName)
         {
+            if (VideoRecording || VideoStreaming) return;
+
             if (!_streaming) StreamOn();
             if (_ffmpegProcess != null && !_ffmpegProcess.HasExited) _ffmpegProcess.Kill();
-            Log.Action($"Saving photo to file: {fileName}");
+            string msg = $"Saving photo to file: {fileName}";
+            Log.Action(msg);
+            if (CommandCallback != null) CommandCallback(msg);
             StartFFmpegProcess("-frames:v 1", fileName);
         }
 
         /// <summary>
-        /// recording a video asynchronously
+        /// start/stop recording a video asynchronously
         /// </summary>
-        /// <param name="fileName">the file path/name for the video</param>
-        public void StartOrStopVideoRecording(string fileName)
+        /// <param name="filePath">the file path/name for the video</param>
+        public void StartOrStopVideoRecording(string filePath)
         {
-            StartOrStopFFmpegVideo($"Saving video to file: {fileName}", string.Empty, fileName);
+            if (VideoRecording) StopVideoRecording();
+            else StartVideoRecording(filePath);
         }
 
         /// <summary>
-        /// stream video asynchronously
+        /// start recording a video asynchronously
+        /// </summary>
+        /// <param name="filePath">the file path/name for the video</param>
+        public void StartVideoRecording(string filePath)
+        {
+            if (!VideoRecording)
+            {
+                StartFFmpegVideo($"Saving video to file: {filePath}", filePath);
+                VideoRecording = true;
+            }
+        }
+
+        /// <summary>
+        /// stop the video recording
+        /// </summary>
+        public void StopVideoRecording()
+        {
+            if (VideoRecording)
+            {
+                StopFFmpegVideo();
+                if (CommandCallback != null) CommandCallback("Stopped video recording");
+                VideoRecording = false;
+                if (VideoStreaming)
+                {
+                    StartFFmpegVideo($"Re-starting video streaming", null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// start/stop stream video asynchronously
         /// </summary>
         public void StartOrStopVideoStreaming()
         {
-            StartOrStopFFmpegVideo($"Starting video streaming", "-f sdl", "Tello");
+            if (VideoStreaming) StopVideoStreaming();
+            else StartVideoStreaming();
         }
 
         /// <summary>
-        /// stop the video. called after SaveVideoAsync or ViewVideoAsync
+        /// start stream video asynchronously
         /// </summary>
-        public void StopVideo()
+        public void StartVideoStreaming()
         {
-            if (_ffmpegProcess == null || _ffmpegProcess.HasExited) return;
-            _ffmpegProcess.Kill();
+            if (!VideoStreaming)
+            {
+                StartFFmpegVideo($"Starting video streaming", null);
+                VideoStreaming = true;
+            }
+        }
+
+        /// <summary>
+        /// stop stream video
+        /// </summary>
+        public void StopVideoStreaming()
+        {
+            if (VideoStreaming)
+            {
+                if (!VideoRecording)
+                {
+                    StopFFmpegVideo();
+                    if (CommandCallback != null) CommandCallback("Stopped video streaming");
+                }
+                VideoStreaming = false;
+            }
         }
 
         /// <summary>
         /// the response from Tello drone after SendMessage
         /// </summary>
-        protected class SendResponse
+        protected class TelloResponse
         {
             public bool Ok { get; set; }
             public string Response { get; set; }
@@ -390,12 +508,13 @@ namespace tellocs
         /// <param name="timeOutMs">time in millisecond to wait for response</param>
         /// <exception cref=""></exception>
         /// <returns>return SendResponse object.</returns>
-        protected SendResponse SendMessage(string message, bool waitForResponse = true, int timeOutMs = 2000, string expectedResponse = "ok")
+        protected TelloResponse SendMessage(string message, bool waitForResponse = true, int timeOutMs = 2000, string expectedResponse = "ok", string context = null)
         {
-            SendResponse result = new SendResponse();
+            TelloResponse result = new TelloResponse();
             try
             {
                 Log.Action($"Send message: {message}");
+                if (CommandCallback != null) CommandCallback(context+message);
                 _udpMessageClient.Connect(_telloIpAddress, _messageUdpPort);
                 Byte[] sendBytes = Encoding.ASCII.GetBytes(message);
 
@@ -409,6 +528,7 @@ namespace tellocs
                     string response = Encoding.ASCII.GetString(receiveBytes);
                     result.Response = response;
                     Log.Info($"Received response: {response}");
+                    if (CommandResultCallback != null) CommandResultCallback(message, response);
                     if (string.Equals(response, "error auto land", StringComparison.OrdinalIgnoreCase))
                     {
                         string msg = $"Tello error: {response}";
@@ -444,6 +564,7 @@ namespace tellocs
                 }
                 result.Exception = err.Message;
                 Log.Error($"Exception: {err.ToString()}");
+                if (CommandResultCallback != null) CommandResultCallback(message, err.Message);
             }
             return result;
         }
@@ -454,7 +575,7 @@ namespace tellocs
             _udpStateClient = new UdpClient(_stateUdpPort);
             _remoteStateIpEndPoint = new IPEndPoint(IPAddress.Any, _stateUdpPort);
             //_udpStateClient.Connect(_remoteStateIpEndPoint);
-            _udpStateClient.Client.ReceiveTimeout = 5000;
+            _udpStateClient.Client.ReceiveTimeout = 10000;
             Task.Run( () =>
             {
                 Log.Action("Started task to update Tello state ...");
@@ -495,7 +616,7 @@ namespace tellocs
                     { }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
             // todo:
             }
@@ -512,30 +633,49 @@ namespace tellocs
             return (int)((degree / 30) * 1000) + 2000;    // in millisecond
         }
 
-        protected void StartOrStopFFmpegVideo(string context, string options, string output)
+        protected void StartFFmpegVideo(string context, string videoFile)
         {
             if (!_streaming) StreamOn();
             if (_ffmpegProcess != null && !_ffmpegProcess.HasExited) _ffmpegProcess.Kill();
-            else
+            //else
             {
-                Log.Action($"Saving video to file: {output}");
-                StartFFmpegProcess(options, output);
+                Log.Action(context);
+                if (CommandCallback != null) CommandCallback(context);
+                string args = string.Empty;
+                if (!string.IsNullOrEmpty(videoFile)) args = $"{videoFile} ";
+                // output to video file plus streaming
+                args = $"{args} -f sdl Tello";
+                StartFFmpegProcess(args);
             }
+        }
+
+        protected void StopFFmpegVideo()
+        {
+            if (_ffmpegProcess != null && !_ffmpegProcess.HasExited) _ffmpegProcess.Kill();
         }
 
         protected void StartFFmpegProcess(string options, string output)
         {
-            string arguments = $"-i udp://0.0.0.0:{_videoUdpPort} {options} {output}";
+            StartFFmpegProcess($"{options} {output}");
+        }
+
+        protected void StartFFmpegProcess(string outputArguments)
+        {
+            string arguments = $"-i udp://0.0.0.0:{_videoUdpPort} {outputArguments}";
             ProcessStartInfo info = new ProcessStartInfo()
             {
-                FileName = "ffmpeg",
+                FileName = FFmpegPath,
                 Arguments = arguments,
                 UseShellExecute = true,
-                //UseShellExecute = false,
-                //RedirectStandardOutput = true,
                 //LoadUserProfile = true,
                 //WindowStyle = ProcessWindowStyle.Minimized
             };
+            if (DebugMode)
+            {
+                info.UseShellExecute = false;
+                info.RedirectStandardOutput = true;
+                //info.WindowStyle = ProcessWindowStyle.Normal;
+            }
             Log.Action($"Starting: ffmpeg {arguments}");
             _ffmpegProcess = Process.Start(info);
             //_ffmpegProcess.WaitForExit();

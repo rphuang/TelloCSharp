@@ -1,0 +1,12 @@
+﻿Window.Top=0
+Window.Left=1010
+Window.Height=850
+Window.Width=640
+DefaultDroneSpeed=55
+DefaultPhotoFolder=c:\temp\tello
+DefaultVideoFolder=c:\temp\tello
+DebugMode=true
+FFmpegPath=c:\bin\ffmpeg\bin\ffmpeg.exe
+Video.Streaming=True
+Video.Redording=False
+

@@ -1,13 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29411.108
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tello", "Tello\Tello.csproj", "{AF51C2FE-0A64-4E93-877F-60E6CAD4B29E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tello", "Tello\Tello.csproj", "{AF51C2FE-0A64-4E93-877F-60E6CAD4B29E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelloCmd", "TelloCmd\TelloCmd.csproj", "{3729BD3C-45C6-4A8B-A6D0-E790AAA69D80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelloCmd", "TelloCmd\TelloCmd.csproj", "{3729BD3C-45C6-4A8B-A6D0-E790AAA69D80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogLib", "LogLib\LogLib.csproj", "{0C5DBBE8-205F-4E89-A11E-E234F947C8B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelloWin", "TelloWin\TelloWin.csproj", "{CCE37B6F-A431-4F83-8527-05C186DB0605}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogLib", "..\LibsCSharp\LogLib\LogLib.csproj", "{FFE99749-11EC-48ED-A151-0487C0BFAE4E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsLib", "..\LibsCSharp\SettingsLib\SettingsLib.csproj", "{B25B9FF1-215E-4559-8065-CF2E202A1EC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +27,18 @@ Global
 		{3729BD3C-45C6-4A8B-A6D0-E790AAA69D80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3729BD3C-45C6-4A8B-A6D0-E790AAA69D80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3729BD3C-45C6-4A8B-A6D0-E790AAA69D80}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0C5DBBE8-205F-4E89-A11E-E234F947C8B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C5DBBE8-205F-4E89-A11E-E234F947C8B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0C5DBBE8-205F-4E89-A11E-E234F947C8B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0C5DBBE8-205F-4E89-A11E-E234F947C8B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCE37B6F-A431-4F83-8527-05C186DB0605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCE37B6F-A431-4F83-8527-05C186DB0605}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCE37B6F-A431-4F83-8527-05C186DB0605}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCE37B6F-A431-4F83-8527-05C186DB0605}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFE99749-11EC-48ED-A151-0487C0BFAE4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFE99749-11EC-48ED-A151-0487C0BFAE4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFE99749-11EC-48ED-A151-0487C0BFAE4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFE99749-11EC-48ED-A151-0487C0BFAE4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B25B9FF1-215E-4559-8065-CF2E202A1EC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B25B9FF1-215E-4559-8065-CF2E202A1EC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B25B9FF1-215E-4559-8065-CF2E202A1EC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B25B9FF1-215E-4559-8065-CF2E202A1EC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,144 @@
+﻿<Window x:Class="TelloWin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TelloWin"
+        mc:Ignorable="d"
+        Title="Tello Controller" Top="0" Left="0" Height="900" Width="640">
+    <Window.Resources>
+        <!-- Style that will be applied to all buttons for this window -->
+        <Style TargetType="{x:Type Button}">
+            <!--<Setter Property="Background" Value="Orange" />-->
+            <!--<Setter Property="BorderBrush" Value="Crimson" />-->
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Height" Value="50" />
+        </Style>
+        <Style TargetType="{x:Type Label}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="5" />
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Background" Value="LightGray" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0" Grid.Column="0" x:Name="btnLand" Margin="0,2,0,0" Tag="land" Click="btnLand_Click">Land</Button>
+        <Button Grid.Row="0" Grid.Column="1" x:Name="btnTakeoff" Margin="0,2,0,0" Tag="takeoff" Click="btnTakeoff_Click">Takeoff</Button>
+        <Button Grid.Row="0" Grid.Column="2" x:Name="btnConnect" Margin="0,2,0,0" Click="btnConnect_Click">Connect</Button>
+        <Button Grid.Row="0" Grid.Column="4" x:Name="btnRunSample" Margin="0,2,0,0" Tag="TelloCommand.txt" Click="btnRun_Click">Run Sample</Button>
+        <!--<Button Grid.Row="1" Grid.Column="1" x:Name="btnTracking" Margin="0,2,0,0" Click="btnTracking_Click">Face Tracking</Button>-->
+        <Button Grid.Row="1" Grid.Column="2" x:Name="btnStreaming" Margin="0,2,0,0" Click="btnStreaming_Click">Streaming</Button>
+        <Button Grid.Row="1" Grid.Column="3" x:Name="btnVideo" Margin="0,2,0,0" Click="btnVideo_Click">Video</Button>
+        <Button Grid.Row="1" Grid.Column="4" x:Name="btnPhoto" Margin="0,2,0,0" Click="btnPhoto_Click">Photo</Button>
+        <Button Grid.Row="2" Grid.Column="0" x:Name="btnSpeed80" Margin="0,2,0,0" Tag="80" Click="btnSpeed_Click">Speed 80</Button>
+        <Button Grid.Row="2" Grid.Column="1" x:Name="btnSpeed65" Margin="0,2,0,0" Tag="65" Click="btnSpeed_Click">Speed 65</Button>
+        <Button Grid.Row="2" Grid.Column="2" x:Name="btnSpeed50" Margin="0,2,0,0" Tag="50" Click="btnSpeed_Click">Speed 50</Button>
+        <Button Grid.Row="2" Grid.Column="3" x:Name="btnSpeed35" Margin="0,2,0,0" Tag="35" Click="btnSpeed_Click">Speed 35</Button>
+        <Button Grid.Row="2" Grid.Column="4" x:Name="btnSpeed20" Margin="0,2,0,0" Tag="20" Click="btnSpeed_Click">Speed 20</Button>
+
+        <ListBox Grid.Row="3" Grid.Column="0" x:Name="commandListBox" Grid.ColumnSpan="3" />
+
+        <Grid Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Margin="10,0,0,0">Speed</Label>
+            <!--<Label Grid.Row="1" Grid.Column="0" Margin="10,0,0,0">Video Width</Label>
+            <Label Grid.Row="2" Grid.Column="0" Margin="10,0,0,0">Video Height</Label>-->
+            <Label Grid.Row="2" Grid.Column="0" Margin="10,0,0,0">Status</Label>
+            <Label Grid.Row="3" Grid.Column="0" Margin="10,0,0,0">Height (cm)</Label>
+            <Label Grid.Row="4" Grid.Column="0" Margin="10,0,0,0">Battery (%)</Label>
+            <Label Grid.Row="5" Grid.Column="0" Margin="10,0,0,0">Flight Time</Label>
+            <Label Grid.Row="6" Grid.Column="0" Margin="10,0,0,0">TOF (cm)</Label>
+            <Label Grid.Row="7" Grid.Column="0" Margin="10,0,0,0">Temperature</Label>
+
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,0" x:Name="speedTxtBox" TextChanged="speedTxtBox_TextChanged">50</TextBox>
+            <!--<TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" x:Name="videoWidthTxtBox">960</TextBox>
+            <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,0,0" x:Name="videoHeightTxtBox">720</TextBox>-->
+            <Label Grid.Row="2" Grid.Column="1" Margin="0,0,0,0" x:Name="statusLabel">Not Connected</Label>
+            <Label Grid.Row="3" Grid.Column="1" Margin="0,0,0,0" x:Name="heightLabel">?</Label>
+            <Label Grid.Row="4" Grid.Column="1" Margin="0,0,0,0" x:Name="batteryLabel">?</Label>
+            <Label Grid.Row="5" Grid.Column="1" Margin="0,0,0,0" x:Name="flightTimeLabel">?</Label>
+            <Label Grid.Row="6" Grid.Column="1" Margin="0,0,0,0" x:Name="tofLabel">?</Label>
+            <Label Grid.Row="7" Grid.Column="1" Margin="0,0,0,0" x:Name="temperatureLabel">?</Label>
+        </Grid>
+        <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="100" x:Name="btnCircleLeft" Margin="0,2,0,0"
+                    Tag="-1, 1, 0, 1" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Circle Left</Button>
+            <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Height="100" x:Name="btnCircleRight" Margin="0,2,0,0"
+                    Tag="1, 1, 0, -1" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Circle Right</Button>
+            <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Height="100" x:Name="btnUp" Margin="0,2,0,0"
+                    Tag="0, 0, 1, 0" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Up</Button>
+            <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Height="100" x:Name="btnForward" Margin="0,2,0,0"
+                    Tag="0, 1, 0, 0" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Forward</Button>
+            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="1" Height="100" x:Name="btnCCW" Margin="0,2,0,0"
+                    Tag="0, 0, 0, -1" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >CCW Rotate</Button>
+            <Button Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" Height="100" x:Name="btnCW" Margin="0,2,0,0"
+                    Tag="0, 0, 0, 1" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >CW Rotate</Button>
+            <Button Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="1" Height="100" x:Name="btnLeft" Margin="0,2,0,0"
+                    Tag="-1, 0, 0, 0" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Left</Button>
+            <Button Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="1" Height="100" x:Name="btnRight" Margin="0,2,0,0"
+                    Tag="1, 0, 0, 0" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Right</Button>
+            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Height="100" x:Name="btnDown" Margin="0,2,0,0"
+                    Tag="0, 0, -1, 0" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Down</Button>
+            <Button Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Height="100" x:Name="btnBackward" Margin="0,2,0,0"
+                    Tag="0, -1, 0, 0" PreviewMouseDown="btn_PreviewMouseDown" PreviewMouseUp="btn_PreviewMouseUp" PreviewTouchDown="btn_PreviewTouchDown" PreviewTouchUp="btn_PreviewTouchUp"
+                    >Backward</Button>
+
+        </Grid>
+    </Grid>
+</Window>

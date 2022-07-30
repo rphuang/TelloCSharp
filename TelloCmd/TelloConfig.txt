@@ -1,0 +1,5 @@
+﻿DefaultDroneSpeed=55
+DefaultPhotoFolder=c:\temp\tello
+DefaultVideoFolder=c:\temp\tello
+DebugMode=true
+FFmpegPath=c:\bin\ffmpeg\bin\ffmpeg.exe
